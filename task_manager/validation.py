@@ -83,7 +83,6 @@ def validate_due_date(due_date: str) -> bool:
     Requirements:
     - Must be in YYYY-MM-DD format
     - Must be a valid calendar date
-    - Cannot be a date in the past (must be today or future)
     
     Args:
         due_date (str): The due date to validate in YYYY-MM-DD format
@@ -104,10 +103,6 @@ def validate_due_date(due_date: str) -> bool:
     except ValueError:
         raise ValueError("❌ Error: Invalid date format. Please use YYYY-MM-DD (e.g., 2024-06-26).")
     
-    today = datetime.now().date()
-    if due_date_obj.date() < today:
-        raise ValueError(f"❌ Error: Due date cannot be in the past. Today is {today}.")
-    
     return True
 
 
@@ -122,14 +117,25 @@ def get_validated_string(prompt: str, validator_func, min_length: int = 0) -> st
         
     Returns:
         str: Validated user input
+        
+    Raises:
+        ValueError: If validation fails and input is exhausted
     """
-    while True:
+    max_attempts = 3
+    attempts = 0
+    
+    while attempts < max_attempts:
         try:
             user_input = input(prompt).strip()
             validator_func(user_input)
             return user_input
         except ValueError as e:
             print(str(e))
+            attempts += 1
+        except EOFError:
+            raise ValueError("Input stream exhausted. Unable to get valid input.")
+    
+    raise ValueError(f"Failed to get valid input after {max_attempts} attempts")
 
 
 def get_validated_integer(prompt: str, min_val: int = None, max_val: int = None) -> int:
@@ -144,15 +150,25 @@ def get_validated_integer(prompt: str, min_val: int = None, max_val: int = None)
     Returns:
         int: Validated integer input
     """
-    while True:
+    max_attempts = 3
+    attempts = 0
+    
+    while attempts < max_attempts:
         try:
             val = int(input(prompt).strip())
             if min_val is not None and val < min_val:
                 print(f"❌ Error: Value must be at least {min_val}.")
+                attempts += 1
                 continue
             if max_val is not None and val > max_val:
                 print(f"❌ Error: Value cannot exceed {max_val}.")
+                attempts += 1
                 continue
             return val
         except ValueError:
             print("❌ Error: Please enter a valid whole number.")
+            attempts += 1
+        except EOFError:
+            raise ValueError("Input stream exhausted. Unable to get valid input.")
+    
+    raise ValueError(f"Failed to get valid integer after {max_attempts} attempts")

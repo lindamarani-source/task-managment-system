@@ -85,7 +85,7 @@ def add_task(title: Optional[str] = None, description: Optional[str] = None, due
     }
     
     tasks_db.append(new_task)
-    print(f"✅ Success: Task '{title}' added successfully with ID #{task_id}.")
+    print(f"Task added successfully!")
     return new_task
 
 
@@ -123,7 +123,7 @@ def mark_task_as_complete(task_id: Optional[int] = None) -> Optional[Dict[str, A
                 print("ℹ️ That task is already marked as complete.")
                 return None
             task["completed"] = True
-            print(f"✅ Success: Task #{task_id} ('{task['title']}') marked complete!")
+            print(f"Task marked as complete!")
             return task
     
     print(f"❌ Error: Task with ID #{task_id} does not exist.")
@@ -165,25 +165,41 @@ def view_pending_tasks(display: bool = True) -> List[Dict[str, Any]]:
     return pending
 
 
-def calculate_progress(display: bool = True) -> Dict[str, Any]:
+def calculate_progress(tasks: Optional[List[Dict[str, Any]]] = None, display: bool = True) -> Any:
     """
     Calculates task completion metrics and progress tracking.
     Optionally displays the metrics.
     
     Args:
+        tasks (List[Dict], optional): List of tasks to calculate progress for.
+                                     If None, uses the global tasks_db.
         display (bool): Whether to print the progress metrics. Default is True.
     
     Returns:
-        Dict[str, Any]: Dictionary containing:
-            - total_tasks: Total number of registered tasks
-            - completed_tasks: Number of completed tasks
-            - remaining_tasks: Number of remaining tasks
-            - completion_rate: Overall completion rate as a percentage
+        When tasks parameter is provided:
+            float: The completion rate as a percentage (e.g., 50.0)
+        When tasks parameter is None (using global tasks_db):
+            Dict[str, Any]: Dictionary containing:
+                - total_tasks: Total number of registered tasks
+                - completed_tasks: Number of completed tasks
+                - remaining_tasks: Number of remaining tasks
+                - completion_rate: Overall completion rate as a percentage
     """
+    # Use provided tasks or global tasks_db
+    task_list = tasks if tasks is not None else tasks_db
+    
+    # If tasks parameter was provided, just return the completion rate
+    if tasks is not None:
+        if len(task_list) == 0:
+            return 0.0
+        completed_count = sum(1 for task in task_list if task.get("completed", False))
+        return (completed_count / len(task_list)) * 100
+    
+    # Otherwise, display full metrics and return dict
     if display:
         print("\n--- Productivity Progress Metrics ---")
     
-    total_tasks = len(tasks_db)
+    total_tasks = len(task_list)
     
     if total_tasks == 0:
         if display:
@@ -195,7 +211,7 @@ def calculate_progress(display: bool = True) -> Dict[str, Any]:
             "completion_rate": 0.0
         }
     
-    completed_tasks = sum(1 for task in tasks_db if task["completed"])
+    completed_tasks = sum(1 for task in task_list if task["completed"])
     remaining_tasks = total_tasks - completed_tasks
     completion_rate = (completed_tasks / total_tasks) * 100
     
