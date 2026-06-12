@@ -15,6 +15,26 @@ from task_manager import (
 from task_manager.validation import get_validated_integer
 
 
+def interactive_add_task() -> None:
+    """Wrapper for interactive task addition."""
+    add_task()
+
+
+def interactive_mark_complete() -> None:
+    """Wrapper for interactive task completion."""
+    mark_task_as_complete()
+
+
+def interactive_view_pending() -> None:
+    """Wrapper for viewing pending tasks."""
+    view_pending_tasks(display=True)
+
+
+def interactive_track_progress() -> None:
+    """Wrapper for tracking progress."""
+    calculate_progress(display=True)
+
+
 def display_menu() -> None:
     """
     Displays the main menu and handles user interactions.
@@ -45,13 +65,13 @@ def display_menu() -> None:
         choice = get_validated_integer("Select an option (1-5): ", min_val=1, max_val=5)
         
         if choice == 1:
-            add_task()
+            interactive_add_task()
         elif choice == 2:
-            view_pending_tasks()
+            interactive_view_pending()
         elif choice == 3:
-            mark_task_as_complete()
+            interactive_mark_complete()
         elif choice == 4:
-            calculate_progress()
+            interactive_track_progress()
         elif choice == 5:
             print("\n👋 Exiting system. Keep up the productive momentum!")
             break
@@ -59,3 +79,4 @@ def display_menu() -> None:
 
 if __name__ == "__main__":
     display_menu()
+
